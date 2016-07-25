@@ -132,6 +132,7 @@ def Suave(integrand, ndim, nnew=1000, nmin=2, flatness=50., userdata=NULL,
   to prevent overflow.
   """
   
+  nmin = int(nmin)
   neval = c_int()
   fail = c_int()
   comp = c_int()
@@ -374,7 +375,7 @@ def demo():
     print('-------------------- %s test -------------------' % name)
   def print_results(name, results):
     keys = ['nregions', 'neval', 'fail']
-    keys = list(filter(results.has_key, keys))
+    keys = [item for item in keys if item in results]
     text = ["%s %d" % (k, results[k]) for k in keys]
     print("%s RESULT:\t" % name.upper() + "\t".join(text))
     for comp in results['results']:
