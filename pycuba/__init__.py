@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals, print_function
 import os
 import ctypes
-from ctypes import POINTER, c_int, c_double, c_void_p, byref
+from ctypes import POINTER, c_int, c_double, c_void_p, byref, c_char_p
 
 """
 Parallelisation within cuba is not supported, because python does not know
@@ -24,7 +24,6 @@ NSTART = 1000
 NINCREASE = 500
 NBATCH = 1000
 GRIDNO = 0
-STATEFILE = NULL
 spin = NULL
 
 class BOUNDS(ctypes.Structure):
@@ -46,7 +45,7 @@ def Vegas(integrand, ndim, userdata=NULL,
     epsrel=EPSREL, epsabs=EPSABS, verbose=0, ncomp=1, seed=None,
     mineval=MINEVAL, maxeval=MAXEVAL, nstart=NSTART, 
     nincrease=NINCREASE, nbatch=NBATCH,
-    gridno=GRIDNO, statefile=NULL, nvec=1):
+    gridno=GRIDNO, statefile=None, nvec=1):
   """
   *nstart*: the number of integrand evaluations per iteration to start
 with.
@@ -102,7 +101,7 @@ iteration.
   lib.Vegas(ndim, ncomp, wrap_integrand(integrand), userdata,
     c_int(nvec), c_double(epsrel), c_double(epsabs), verbose, seed,
     mineval, maxeval, nstart, nincrease, nbatch,
-    gridno, statefile, spin,
+    gridno, c_char_p(statefile), spin,
     byref(neval), byref(fail), integral, error, prob)
   
   return dict(neval=neval.value, fail=fail.value, comp=comp.value,
@@ -114,7 +113,7 @@ iteration.
 
 def Suave(integrand, ndim, nnew=1000, nmin=2, flatness=50., userdata=NULL, 
     epsrel=EPSREL, epsabs=EPSABS, verbose=0, ncomp=1, seed=None,
-    mineval=MINEVAL, maxeval=MAXEVAL, statefile=NULL, nvec=1):
+    mineval=MINEVAL, maxeval=MAXEVAL, statefile=None, nvec=1):
   """
   *nnew*: the number of new integrand evaluations in each subdivision.
   
@@ -147,7 +146,7 @@ def Suave(integrand, ndim, nnew=1000, nmin=2, flatness=50., userdata=NULL,
   
   lib.Suave(ndim, ncomp, wrap_integrand(integrand), userdata,
     c_int(nvec), c_double(epsrel), c_double(epsabs), verbose, seed,
-    mineval, maxeval, nnew, nmin, c_double(flatness), statefile, spin,
+    mineval, maxeval, nnew, nmin, c_double(flatness), c_char_p(statefile), spin,
     byref(nregions), byref(neval), byref(fail), integral, error, prob)
   
   return dict(neval=neval.value, fail=fail.value, comp=comp.value, nregions=nregions.value,
@@ -163,7 +162,7 @@ def Divonne(integrand, ndim,
     mineval=MINEVAL, maxeval=MAXEVAL, ncomp=1,
     ldxgiven=None, xgiven=None, nextra=0, peakfinder=None,
     userdata=NULL, seed=None,
-    epsrel=EPSREL, epsabs=EPSABS, verbose=0, statefile=NULL, nvec=1):
+    epsrel=EPSREL, epsabs=EPSABS, verbose=0, statefile=None, nvec=1):
   """
   *key1*: determines sampling in the partitioning phase:
     key1 = 7, 9, 11, 13 selects the cubature rule of degree key1. Note that the degree-11
@@ -292,7 +291,7 @@ def Divonne(integrand, ndim,
     c_int(nvec), c_double(epsrel), c_double(epsabs), verbose, seed,
     mineval, maxeval, key1, key2, key3, maxpass, 
     c_double(border), c_double(maxchisq), c_double(mindeviation), 
-    ngiven, ldxgiven, xgiven, nextra, peakfinder, statefile, spin,
+    ngiven, ldxgiven, xgiven, nextra, peakfinder, c_char_p(statefile), spin,
     byref(nregions), byref(neval), byref(fail), integral, error, prob)
   
   return dict(neval=neval.value, fail=fail.value, comp=comp.value, nregions=nregions.value,
@@ -305,7 +304,7 @@ def Divonne(integrand, ndim,
 def Cuhre(integrand, ndim, 
     key=0, mineval=MINEVAL, maxeval=MAXEVAL, ncomp=1,
     userdata=NULL, seed=None,
-    epsrel=EPSREL, epsabs=EPSABS, verbose=0, statefile=NULL, nvec=1):
+    epsrel=EPSREL, epsabs=EPSABS, verbose=0, statefile=None, nvec=1):
   """
   *key* chooses the basic integration rule:
     key = 7, 9, 11, 13 selects the cubature rule of degree key. Note that the degree-11
@@ -328,7 +327,7 @@ def Cuhre(integrand, ndim,
 
   lib.Cuhre(ndim, ncomp, wrap_integrand(integrand), userdata,
     c_int(nvec), c_double(epsrel), c_double(epsabs), verbose,
-    mineval, maxeval, key, statefile, spin,
+    mineval, maxeval, key, c_char_p(statefile), spin,
     byref(nregions), byref(neval), byref(fail), integral, error, prob)
   
   return dict(neval=neval.value, fail=fail.value, comp=comp.value, nregions=nregions.value,
